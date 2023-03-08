@@ -1,0 +1,23 @@
+{
+  "name": "crud-cli-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "database.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rootdnh/CRUD-cli-com-NODEJS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rootdnh/CRUD-cli-com-NODEJS/issues"
+  },
+  "homepage": "https://github.com/rootdnh/CRUD-cli-com-NODEJS#readme",
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+}
