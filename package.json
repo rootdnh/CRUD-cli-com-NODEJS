@@ -19,5 +19,8 @@
   "homepage": "https://github.com/rootdnh/CRUD-cli-com-NODEJS#readme",
   "devDependencies": {
     "mocha": "^10.2.0"
+  },
+  "dependencies": {
+    "commander": "^10.0.0"
   }
 }

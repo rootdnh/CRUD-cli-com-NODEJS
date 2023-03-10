@@ -1,63 +1,77 @@
-const {
-  readFile, 
-  writeFile
-} = require('fs')
-
-const {
-  promisify //metodo para transformar em promise
-} = require('util')
-
-const readFileAsync = promisify(readFile); //transformando o readFile em promise
-const writeFileAsync = promisify(writeFile);
+const { writeFile, readFile } = require('fs');
+const { promisify } = require('util');
+const [writeFileAsync, readFileAsync] = [
+  promisify(writeFile),
+  promisify(readFile),
+];
 
 class Database {
-
-  constructor(){
-    this.NOME_ARQUIVO = "herois.json";
+  constructor() {
+    this.FILENAME = 'heroes.json';
   }
 
- async getArquivo() {
-  const arquivo = await readFileAsync(this.NOME_ARQUIVO, 'utf8'); 
-  return JSON.parse(arquivo.toString());
- }
+  async obterArquivo() {
+    const arquivo = await readFileAsync(this.FILENAME);
+    return JSON.parse(arquivo.toString());
+  }
 
- async setArquivo(dados) { 
-    await writeFileAsync(this.NOME_ARQUIVO, JSON.stringify(dados));
+  async escreverArquivo(dados) {
+    await writeFileAsync(this.FILENAME, JSON.stringify(dados));
     return true;
- }
- async cadastrar(heroi){
-  const dados = await this.getArquivo();
-  const id = heroi.id <= 2 ? heroi.id : Date.now(); //apenas para testes
-  const heroisComId = {
-    id,
-    ...heroi
   }
-  const dadosFinal = [
-    ...dados,
-    heroisComId
-  ]
-  const resultado = await this.setArquivo(dadosFinal);
-  return resultado;
- }
 
- async listar(id) {
-  const dados = await this.getArquivo()
-  const dadosFiltrados = dados.filter(item =>(id ? (item.id === id) : true));
-  return dadosFiltrados;
- }
+  async cadastrar(heroi) {
+    const dados = await this.obterArquivo();
+    //workaround para simular um id
+    const id = heroi.id <= 2 ? heroi.id : Date.now();
+    const heroiComId = {
+      ...heroi,
+      id,
+    };
 
- async remover(id) {
-  if(!id){
-    return await this.setArquivo([]);//retorna boolean
+    return await this.escreverArquivo([...dados, heroiComId]);
   }
-  const dados = await this.getArquivo();
-  const indice = dados.findIndex(item => item.id === parseInt(id));
-  if(indice === -1){
-    throw  Error('O usuário não existe');
+
+  async listar(id) {
+    const dados = await this.obterArquivo();
+    // se nao passar o id, traz tudo
+    return dados.filter(item => (id ? item.id == id : true));
   }
-  dados.splice(indice, 1);
-  return await this.setArquivo(dados)
- }  
+
+  async atualizar(id, atualizacoes) {
+    const dados = await this.obterArquivo();
+    const indice = dados.findIndex(item => item.id === parseInt(id));
+    if (indice === -1) {
+      throw Error('heroi não existe!');
+    }
+
+    const atual = dados[indice];
+    dados.splice(indice, 1);
+
+    //workaround para remover valores undefined do objeto
+    const objAtualizado = JSON.parse(JSON.stringify(atualizacoes));
+    const dadoAtualizado = Object.assign({}, atual, objAtualizado);
+
+    return await this.escreverArquivo([...dados, dadoAtualizado]);
+  }
+
+  async remover(id) {
+    if (!id) {
+      await this.escreverArquivo([]);
+      return true;
+    }
+
+    const dados = await this.obterArquivo();
+
+    const indice = dados.findIndex(item => item.id === parseInt(id));
+    if (indice === -1) {
+      throw Error('heroi não existe!');
+    }
+    const atual = dados[indice];
+    dados.splice(indice, 1);
+    await this.escreverArquivo(dados);
+    return true;
+  }
 }
 
-module.exports = new Database(); 
+module.exports = new Database();
